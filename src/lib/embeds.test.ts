@@ -8,7 +8,7 @@ describe('toEmbed', () => {
     )
     expect(toEmbed('https://www.instagram.com/reel/DgGtRPniWWf/')?.src).toBe('https://www.instagram.com/reel/DgGtRPniWWf/embed')
     expect(toEmbed('https://www.youtube.com/shorts/0B9iEqINyCs')).toEqual({
-      network: 'youtube', src: 'https://www.youtube-nocookie.com/embed/0B9iEqINyCs?rel=0&playsinline=1', vertical: true,
+      network: 'youtube', src: 'https://www.youtube-nocookie.com/embed/0B9iEqINyCs?rel=0&playsinline=1', vertical: true, thumb: 'https://i.ytimg.com/vi/0B9iEqINyCs/hqdefault.jpg',
     })
   })
   it('acepta otros formatos de YouTube', () => {
@@ -20,5 +20,13 @@ describe('toEmbed', () => {
     expect(toEmbed('https://example.com/video/123456789')).toBeNull()
     expect(toEmbed('javascript:alert(1)')).toBeNull()
     expect(toEmbed('no es url')).toBeNull()
+  })
+})
+
+describe('miniaturas', () => {
+  it('YouTube trae su miniatura; TikTok e Instagram no', () => {
+    expect(toEmbed('https://youtu.be/dQw4w9WgXcQ')?.thumb).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg')
+    expect(toEmbed('https://www.tiktok.com/@a/video/7704866148243754270')?.thumb).toBeUndefined()
+    expect(toEmbed('https://www.instagram.com/reel/ABCdef123/')?.thumb).toBeUndefined()
   })
 })

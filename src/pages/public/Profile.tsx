@@ -39,7 +39,7 @@ export default function Profile() {
         supabase.from('social_links').select('*').eq('user_id', profile.id).order('position'),
         supabase
           .from('campaigns')
-          .select('id, user_id, brand, title_en, title_es, description_en, description_es, via, status, is_public, position, campaign_videos(id, network, url, position)')
+          .select('id, user_id, brand, title_en, title_es, description_en, description_es, via, status, is_public, position, campaign_videos(*)')
           .eq('user_id', profile.id)
           .eq('is_public', true)
           .order('position'),
@@ -60,8 +60,8 @@ export default function Profile() {
   const featured = (data?.campaigns ?? []).flatMap((c) =>
     [...(c.campaign_videos ?? [])]
       .sort((a, b) => a.position - b.position)
-      .map((v) => ({ id: v.id, url: v.url, brand: c.brand, embed: toEmbed(v.url) }))
-      .filter((v): v is { id: string; url: string; brand: string; embed: NonNullable<ReturnType<typeof toEmbed>> } => v.embed !== null),
+      .map((v) => ({ id: v.id, url: v.url, brand: c.brand, cover: avatarUrl(v.cover_path), embed: toEmbed(v.url) }))
+      .filter((v): v is { id: string; url: string; brand: string; cover: string | null; embed: NonNullable<ReturnType<typeof toEmbed>> } => v.embed !== null),
   )
 
   if (data === null) return <NotFound profile />

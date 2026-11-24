@@ -208,4 +208,23 @@ do $$ begin
   assert not exists (select 1 from public.audit_log where user_id = '22222222-2222-4222-8222-222222222222'), 'auditoría no borrada';
 end $$;
 
+\echo '13. La portada de un video solo puede apuntar a la carpeta de su dueño'
+begin;
+select set_config('request.jwt.claims', json_build_object('sub', :'julian', 'role', 'authenticated')::text, true);
+set local role authenticated;
+do $$ begin
+  update public.campaign_videos set cover_path = '11111111-1111-4111-8111-111111111111/covers/a.jpg' where position = 0;
+  begin
+    update public.campaign_videos set cover_path = '22222222-2222-4222-8222-222222222222/covers/a.jpg';
+    raise exception 'portada en carpeta ajena aceptada';
+  exception when check_violation then null;
+  end;
+  begin
+    update public.campaign_videos set cover_path = '11111111-1111-4111-8111-111111111111/../x.jpg';
+    raise exception 'ruta con .. aceptada';
+  exception when check_violation then null;
+  end;
+end $$;
+rollback;
+
 \echo 'Todas las pruebas de RLS pasaron.'

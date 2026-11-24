@@ -186,7 +186,7 @@ const CookieTable = ({ es }: { es: boolean }) => (
         <tr className="border-t border-line"><td className="py-2 pr-3"><code>cookie-consent</code></td><td className="pr-3">{es ? 'Esencial (localStorage)' : 'Essential (localStorage)'}</td><td className="pr-3">{es ? 'Recordar tu elección sobre cookies.' : 'Remember your cookie choice.'}</td><td>{es ? 'Hasta que la cambies' : 'Until you change it'}</td></tr>
         <tr className="border-t border-line"><td className="py-2 pr-3"><code>lang</code></td><td className="pr-3">{es ? 'Preferencia (localStorage)' : 'Preference (localStorage)'}</td><td className="pr-3">{es ? 'Recordar el idioma.' : 'Remember your language.'}</td><td>{es ? 'Permanente' : 'Persistent'}</td></tr>
         <tr className="border-t border-line"><td className="py-2 pr-3"><code>login-failures</code>, <code>last-activity-ping</code></td><td className="pr-3">{es ? 'Esencial (localStorage)' : 'Essential (localStorage)'}</td><td className="pr-3">{es ? 'Freno de intentos de inicio de sesión y registro de actividad de la cuenta.' : 'Sign-in attempt throttling and account activity tracking.'}</td><td>{es ? 'Minutos / 1 hora' : 'Minutes / 1 hour'}</td></tr>
-        <tr className="border-t border-line"><td className="py-2 pr-3">{es ? 'Reproductores de TikTok, Instagram y YouTube' : 'TikTok, Instagram and YouTube players'}</td><td className="pr-3">{es ? 'Terceros (solo al reproducir)' : 'Third party (only on play)'}</td><td className="pr-3">{es ? 'Mostrar el video dentro del perfil. Solo se cargan cuando tocas "Reproducir aquí"; esas redes pueden usar sus propias cookies según sus políticas. YouTube se carga en modo de privacidad mejorada (youtube-nocookie).' : 'Show the video inside the profile. They only load when you tap "Play here"; those networks may set their own cookies under their policies. YouTube loads in privacy-enhanced mode (youtube-nocookie).'}</td><td>{es ? 'Según cada red' : 'Per network'}</td></tr>
+        <tr className="border-t border-line"><td className="py-2 pr-3">{es ? 'Reproductores de TikTok, Instagram y YouTube' : 'TikTok, Instagram and YouTube players'}</td><td className="pr-3">{es ? 'Terceros (solo al reproducir)' : 'Third party (only on play)'}</td><td className="pr-3">{es ? 'Mostrar el video dentro del perfil. Solo se cargan cuando tocas "Reproducir aquí"; esas redes pueden usar sus propias cookies según sus políticas. YouTube se carga en modo de privacidad mejorada (youtube-nocookie). Antes de reproducir solo se muestra la miniatura de YouTube desde i.ytimg.com, que no guarda cookies.' : 'Show the video inside the profile. They only load when you tap "Play here"; those networks may set their own cookies under their policies. YouTube loads in privacy-enhanced mode (youtube-nocookie). Before play, only the YouTube thumbnail is shown from i.ytimg.com, which sets no cookies.'}</td><td>{es ? 'Según cada red' : 'Per network'}</td></tr>
         <tr className="border-t border-line"><td className="py-2 pr-3">Cloudflare Web Analytics</td><td className="pr-3">{es ? 'Analítica (opcional)' : 'Analytics (optional)'}</td><td className="pr-3">{es ? 'Estadísticas agregadas de visitas, sin cookies de rastreo ni perfiles. Solo si la aceptas.' : 'Aggregate visit statistics, no tracking cookies or profiling. Only if you accept.'}</td><td>{es ? 'Sesión' : 'Session'}</td></tr>
       </tbody>
     </table>
@@ -198,7 +198,7 @@ export const cookies: LegalDoc = {
   body: {
     es: (
       <>
-        <p>{N} usa el mínimo de almacenamiento en tu navegador. No usamos cookies publicitarias. Los videos de los perfiles no cargan nada de TikTok, Instagram o YouTube hasta que el visitante toca "Reproducir aquí".</p>
+        <p>{N} usa el mínimo de almacenamiento en tu navegador. No usamos cookies publicitarias. Los videos de los perfiles no cargan el reproductor de TikTok, Instagram o YouTube hasta que el visitante toca "Reproducir aquí" (antes solo se ve la portada).</p>
         <h2>Qué usamos</h2>
         <CookieTable es />
         <h2>Tu elección</h2>
@@ -208,7 +208,7 @@ export const cookies: LegalDoc = {
     ),
     en: (
       <>
-        <p>{N} uses the minimum browser storage. We do not use advertising cookies. Profile videos load nothing from TikTok, Instagram or YouTube until the visitor taps "Play here".</p>
+        <p>{N} uses the minimum browser storage. We do not use advertising cookies. Profile videos do not load the TikTok, Instagram or YouTube player until the visitor taps "Play here" (before that, only the cover is shown).</p>
         <h2>What we use</h2>
         <CookieTable es={false} />
         <h2>Your choice</h2>

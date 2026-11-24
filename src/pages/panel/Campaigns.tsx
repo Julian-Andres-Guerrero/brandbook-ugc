@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Alert, Button, Card, Input, Select, Spinner, Textarea } from '../../components/ui'
 import { NETWORK_LABEL } from '../../components/SocialIcon'
-import { useAuth } from '../../lib/auth'
+import { avatarUrl, useAuth } from '../../lib/auth'
+import { prepareCover } from '../../lib/files'
 import { supabase } from '../../lib/supabase'
 import { VIDEO_NETWORKS, type Campaign, type CampaignStatus, type VideoNetwork } from '../../lib/types'
 
 const STATUS_LABEL: Record<CampaignStatus, string> = { completed: 'Completada', published: 'Publicada', in_progress: 'En curso' }
-type Draft = Omit<Campaign, 'id' | 'user_id' | 'position' | 'campaign_videos'> & { id?: string; videos: { network: VideoNetwork; url: string }[] }
-const blank: Draft = { brand: '', title_en: '', title_es: '', description_en: '', description_es: '', via: '', status: 'in_progress', is_public: true, videos: [] }
+type Draft = Omit<Campaign, 'id' | 'user_id' | 'position' | 'campaign_videos'> & { id?: string; videos: DraftVideo[]; origCovers: string[] }
+type DraftVideo = { network: VideoNetwork; url: string; cover_path?: string | null }
+const blank: Draft = { brand: '', title_en: '', title_es: '', description_en: '', description_es: '', via: '', status: 'in_progress', is_public: true, videos: [], origCovers: [] }
 
 function guessNetwork(url: string): VideoNetwork {
   if (/tiktok\.com/i.test(url)) return 'tiktok'
@@ -24,6 +26,7 @@ export default function Campaigns() {
   const [draft, setDraft] = useState<Draft | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [coverBusy, setCoverBusy] = useState<number | null>(null)
 
   const load = useCallback(async () => {
     if (!profile) return
@@ -42,8 +45,42 @@ export default function Campaigns() {
     setDraft({
       id: c.id, brand: c.brand, title_en: c.title_en, title_es: c.title_es ?? '', description_en: c.description_en ?? '', description_es: c.description_es ?? '',
       via: c.via ?? '', status: c.status, is_public: c.is_public,
-      videos: [...(c.campaign_videos ?? [])].sort((a, b) => a.position - b.position).map((v) => ({ network: v.network, url: v.url })),
+      videos: [...(c.campaign_videos ?? [])].sort((a, b) => a.position - b.position).map((v) => ({ network: v.network, url: v.url, cover_path: v.cover_path ?? null })),
+      origCovers: coversOf(c),
     })
+
+  const coversOf = (c: Campaign) => (c.campaign_videos ?? []).map((v) => v.cover_path).filter((p): p is string => Boolean(p))
+  const draftCovers = (d: Draft) => d.videos.map((v) => v.cover_path).filter((p): p is string => Boolean(p))
+  const removeCovers = async (paths: string[]) => {
+    if (paths.length) await supabase.storage.from('avatars').remove(paths)
+  }
+  const setVideo = (i: number, patch: Partial<DraftVideo>) =>
+    setDraft((d) => (d ? { ...d, videos: d.videos.map((x, j) => (j === i ? { ...x, ...patch } : x)) } : d))
+
+  async function uploadCover(i: number, file: File | undefined) {
+    if (!file || !draft) return
+    setError(null)
+    setCoverBusy(i)
+    try {
+      const img = await prepareCover(file)
+      const path = `${profile!.id}/covers/${crypto.randomUUID()}.jpg`
+      const { error } = await supabase.storage.from('avatars').upload(path, img, { contentType: 'image/jpeg' })
+      if (error) throw error
+      const prev = draft.videos[i]?.cover_path
+      // Una portada recién subida que se reemplaza antes de guardar se borra ya.
+      if (prev && !draft.origCovers.includes(prev)) await removeCovers([prev])
+      setVideo(i, { cover_path: path })
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setCoverBusy(null)
+    }
+  }
+
+  async function cancel() {
+    if (draft) await removeCovers(draftCovers(draft).filter((p) => !draft.origCovers.includes(p)))
+    setDraft(null)
+  }
 
   async function onSave(e: FormEvent) {
     e.preventDefault()
@@ -68,9 +105,11 @@ export default function Campaigns() {
         id = data.id as string
       }
       if (draft.videos.length) {
-        const { error } = await supabase.from('campaign_videos').insert(draft.videos.map((v, i) => ({ campaign_id: id, user_id: profile!.id, network: v.network, url: v.url.trim(), position: i })))
+        const { error } = await supabase.from('campaign_videos').insert(draft.videos.map((v, i) => ({ campaign_id: id, user_id: profile!.id, network: v.network, url: v.url.trim(), position: i, ...(v.cover_path ? { cover_path: v.cover_path } : {}) })))
         if (error) throw error
       }
+      const kept = draftCovers(draft)
+      await removeCovers(draft.origCovers.filter((p) => !kept.includes(p)))
       setDraft(null)
       await load()
     } catch (e) {
@@ -82,7 +121,8 @@ export default function Campaigns() {
 
   async function remove(c: Campaign) {
     if (!confirm(`¿Borrar la campaña "${c.title_en}" de tu perfil público?`)) return
-    await supabase.from('campaigns').delete().eq('id', c.id)
+    const { error } = await supabase.from('campaigns').delete().eq('id', c.id)
+    if (!error) await removeCovers(coversOf(c))
     load()
   }
 
@@ -126,25 +166,46 @@ export default function Campaigns() {
             </label>
             <fieldset className="space-y-2 sm:col-span-2">
               <legend className="text-sm font-medium">Videos</legend>
-              {draft.videos.map((v, i) => (
-                <div key={i} className="flex gap-2">
-                  <label className="sr-only" htmlFor={`vnet-${i}`}>Red</label>
-                  <select id={`vnet-${i}`} value={v.network} onChange={(e) => setDraft({ ...draft, videos: draft.videos.map((x, j) => (j === i ? { ...x, network: e.target.value as VideoNetwork } : x)) })} className="rounded-xl border border-line bg-bg px-2">
-                    {VIDEO_NETWORKS.map((n) => <option key={n} value={n}>{NETWORK_LABEL[n]}</option>)}
-                  </select>
-                  <label className="sr-only" htmlFor={`vurl-${i}`}>URL del video</label>
-                  <input id={`vurl-${i}`} type="url" required placeholder="https://" value={v.url}
-                    onChange={(e) => setDraft({ ...draft, videos: draft.videos.map((x, j) => (j === i ? { url: e.target.value, network: x.url ? x.network : guessNetwork(e.target.value) } : x)) })}
-                    onBlur={(e) => setDraft({ ...draft, videos: draft.videos.map((x, j) => (j === i && x.network === 'other' ? { ...x, network: guessNetwork(e.target.value) } : x)) })}
-                    className="flex-1 rounded-xl border border-line bg-bg px-3 py-2" />
-                  <button type="button" aria-label="Quitar video" className="px-2 text-bad" onClick={() => setDraft({ ...draft, videos: draft.videos.filter((_, j) => j !== i) })}>✕</button>
+              {draft.videos.map((v, i) => {
+                const cover = avatarUrl(v.cover_path)
+                return (
+                <div key={i} className="space-y-2 rounded-xl border border-line p-2">
+                  <div className="flex gap-2">
+                    <label className="sr-only" htmlFor={`vnet-${i}`}>Red</label>
+                    <select id={`vnet-${i}`} value={v.network} onChange={(e) => setVideo(i, { network: e.target.value as VideoNetwork })} className="rounded-xl border border-line bg-bg px-2">
+                      {VIDEO_NETWORKS.map((n) => <option key={n} value={n}>{NETWORK_LABEL[n]}</option>)}
+                    </select>
+                    <label className="sr-only" htmlFor={`vurl-${i}`}>URL del video</label>
+                    <input id={`vurl-${i}`} type="url" required placeholder="https://" value={v.url}
+                      onChange={(e) => setVideo(i, { url: e.target.value, network: v.url ? v.network : guessNetwork(e.target.value) })}
+                      onBlur={(e) => v.network === 'other' && setVideo(i, { network: guessNetwork(e.target.value) })}
+                      className="min-w-0 flex-1 rounded-xl border border-line bg-bg px-3 py-2" />
+                    <button type="button" aria-label="Quitar video" className="px-2 text-bad" onClick={() => setDraft({ ...draft, videos: draft.videos.filter((_, j) => j !== i) })}>✕</button>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {cover
+                      ? <img src={cover} alt="" className="h-16 w-9 shrink-0 rounded-md object-cover" />
+                      : <div className="grid h-16 w-9 shrink-0 place-items-center rounded-md bg-surface-2 text-[10px] text-muted" aria-hidden>9:16</div>}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                      <label className="cursor-pointer text-accent underline">
+                        {coverBusy === i ? 'Subiendo…' : cover ? 'Cambiar portada' : 'Subir portada'}
+                        <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={coverBusy !== null}
+                          onChange={(e) => { uploadCover(i, e.target.files?.[0]); e.target.value = '' }} />
+                      </label>
+                      {cover && <button type="button" className="text-muted underline" onClick={() => { if (!draft.origCovers.includes(v.cover_path!)) removeCovers([v.cover_path!]); setVideo(i, { cover_path: null }) }}>Quitar portada</button>}
+                      <span className="w-full text-xs text-muted">
+                        {v.network === 'youtube' ? 'Opcional: si no subes una, se usa la miniatura de YouTube.' : 'Una captura del video (vertical) se ve mejor en el carrusel.'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              ))}
+                )
+              })}
               <button type="button" className="text-sm text-accent underline" onClick={() => setDraft({ ...draft, videos: [...draft.videos, { network: 'other', url: '' }] })}>+ Agregar video</button>
             </fieldset>
             <div className="flex gap-2 sm:col-span-2">
               <Button disabled={busy}>{busy ? 'Guardando…' : 'Guardar'}</Button>
-              <Button type="button" variant="ghost" onClick={() => setDraft(null)}>Cancelar</Button>
+              <Button type="button" variant="ghost" onClick={cancel}>Cancelar</Button>
             </div>
           </Card>
         </form>

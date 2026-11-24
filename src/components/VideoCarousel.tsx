@@ -3,7 +3,7 @@ import { useLang } from '../lib/i18n'
 import type { Embed } from '../lib/embeds'
 import { VideoEmbed } from './VideoEmbed'
 
-export type CarouselVideo = { id: string; url: string; brand: string; embed: Embed }
+export type CarouselVideo = { id: string; url: string; brand: string; cover: string | null; embed: Embed }
 
 /**
  * Carrusel centrado: el video activo queda al centro y los vecinos asoman a
@@ -79,7 +79,7 @@ export function VideoCarousel({ videos }: { videos: CarouselVideo[] }) {
             onClick={() => i !== current && goTo(i)}
           >
             <div className={i === current ? '' : 'pointer-events-none'}>
-              <VideoEmbed embed={v.embed} title={v.brand} href={v.url} />
+              <VideoEmbed embed={v.embed} title={v.brand} href={v.url} cover={v.cover ?? v.embed.thumb} />
             </div>
           </li>
         ))}

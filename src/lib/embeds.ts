@@ -1,6 +1,9 @@
 // Convierte el link de un video en una URL de reproductor embebido.
 // Solo TikTok, Instagram y YouTube; cualquier otro link se muestra como botón.
-export type Embed = { network: 'tiktok' | 'instagram' | 'youtube'; src: string; vertical: boolean }
+// `thumb` solo existe para YouTube (i.ytimg.com no usa cookies); TikTok e
+// Instagram no ofrecen una miniatura pública estable, por eso el creador sube
+// su propia portada desde el panel.
+export type Embed = { network: 'tiktok' | 'instagram' | 'youtube'; src: string; vertical: boolean; thumb?: string }
 
 export function toEmbed(url: string): Embed | null {
   let u: URL
@@ -27,7 +30,12 @@ export function toEmbed(url: string): Embed | null {
         : (u.pathname.match(/^\/(?:shorts|embed|live)\/([\w-]{6,20})/)?.[1] ?? u.searchParams.get('v'))
     if (!id || !/^[\w-]{6,20}$/.test(id)) return null
     // youtube-nocookie: YouTube no guarda cookies hasta que se reproduce.
-    return { network: 'youtube', src: `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1`, vertical: u.pathname.startsWith('/shorts/') }
+    return {
+      network: 'youtube',
+      src: `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1`,
+      vertical: u.pathname.startsWith('/shorts/'),
+      thumb: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+    }
   }
   return null
 }

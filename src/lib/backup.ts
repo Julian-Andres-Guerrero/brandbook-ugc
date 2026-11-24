@@ -79,7 +79,7 @@ export async function importBackup(json: unknown, userId: string) {
       .select('id')
       .single()
     if (error) throw new Error(error.message)
-    const vids = (c.campaign_videos ?? []).map((v) => ({ campaign_id: data.id, user_id: userId, network: v.network, url: v.url, position: v.position }))
+    const vids = (c.campaign_videos ?? []).map((v) => ({ campaign_id: data.id, user_id: userId, network: v.network, url: v.url, position: v.position, cover_path: v.cover_path?.startsWith(`${userId}/covers/`) ? v.cover_path : null }))
     if (vids.length) await supabase.from('campaign_videos').insert(vids)
     campaigns++
   }

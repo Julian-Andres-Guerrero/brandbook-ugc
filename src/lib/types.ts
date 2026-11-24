@@ -35,7 +35,7 @@ export const VIDEO_NETWORKS = ['tiktok', 'instagram', 'youtube', 'facebook', 'x'
 export type VideoNetwork = (typeof VIDEO_NETWORKS)[number]
 
 export type CampaignStatus = 'completed' | 'published' | 'in_progress'
-export type CampaignVideo = { id: string; campaign_id: string; user_id: string; network: VideoNetwork; url: string; position: number }
+export type CampaignVideo = { id: string; campaign_id: string; user_id: string; network: VideoNetwork; url: string; position: number; cover_path?: string | null }
 export type Campaign = {
   id: string
   user_id: string
