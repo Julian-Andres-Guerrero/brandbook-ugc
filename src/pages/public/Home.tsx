@@ -20,7 +20,7 @@ export default function Home() {
         <p className="mt-5 max-w-2xl text-lg text-muted">{t('hero_sub')}</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link to="/registro" className={btn.primary}>{t('hero_cta')}</Link>
-          <Link to="/@julianguerrerooficial" className={btn.secondary}>{t('hero_example')}</Link>
+          <Link to="/@julianguerrero" className={btn.secondary}>{t('hero_example')}</Link>
         </div>
       </section>
       <section className="mx-auto grid max-w-5xl gap-4 px-4 sm:grid-cols-2" aria-label="Features">

@@ -3,19 +3,21 @@
 -- registros privados del panel.
 --
 -- Local: se ejecuta solo con `npx supabase db reset`.
--- Producción: 1) regístrate en /registro con el usuario julianguerrerooficial,
+-- Producción: 1) regístrate en /registro (usuario de Julian: julianguerrero),
 --             2) pega este archivo en Supabase > SQL Editor y ejecútalo.
 -- Busca al dueño por el nombre de usuario, así que no necesitas tu UUID.
 -- Es idempotente para los registros: si ya existen, no los duplica.
 -- =============================================================================
 do $$
 declare
+  -- Cambia aquí el nombre de usuario si te registraste con otro.
+  v_username text := 'julianguerrero';
   v_uid uuid;
   v_c   uuid;
 begin
-  select id into v_uid from public.profiles where username = 'julianguerrerooficial';
+  select id into v_uid from public.profiles where username = v_username;
   if v_uid is null then
-    raise exception 'Primero regístrate con el usuario julianguerrerooficial';
+    raise exception 'Primero regístrate en el sitio con el usuario %', v_username;
   end if;
 
   -- Perfil público -----------------------------------------------------------

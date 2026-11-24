@@ -16,7 +16,7 @@ insert into auth.users (
   extensions.crypt('LocalDev2026!', extensions.gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"username":"julianguerrerooficial","display_name":"Julian Guerrero"}',
+  '{"username":"julianguerrero","display_name":"Julian Guerrero"}',
   now(), now(), '', '', '', ''
 );
 

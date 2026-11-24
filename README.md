@@ -81,7 +81,7 @@ VITE_SITE_URL=http://localhost:5173
 npm run dev
 ```
 
-- Perfil público: http://localhost:5173/@julianguerrerooficial
+- Perfil público: http://localhost:5173/@julianguerrero
 - Panel: http://localhost:5173/entrar con el usuario **local** `julian@local.test` y la contraseña `LocalDev2026!` (solo existe en tu Docker; nunca en producción).
 - Correos locales (confirmación, recuperar contraseña): http://localhost:54324 (Mailpit).
 
@@ -137,7 +137,7 @@ El proyecto se despliega como **Cloudflare Worker con archivos estáticos** (pla
 
 En producción:
 
-1. Entra a `/registro` y crea tu cuenta con el usuario **`julianguerrerooficial`**. Confirma tu correo.
+1. Entra a `/registro` y crea tu cuenta con tu usuario (el de Julian es **`julianguerrero`**; si usas otro, cámbialo en la línea `v_username` del script). Confirma tu correo.
 2. En Supabase, abre **SQL Editor**, pega el contenido de `supabase/seed/10_julian_data.sql` y ejecútalo.
 
 Eso carga tu perfil (nichos, servicios, redes, contacto), las 5 campañas públicas con sus videos y los 3 registros privados del panel. El script busca tu cuenta por el nombre de usuario y no duplica los registros si lo corres dos veces.

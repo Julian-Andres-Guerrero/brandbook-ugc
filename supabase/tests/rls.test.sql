@@ -16,7 +16,7 @@ values (:'maria', 'maria@local.test', '{"username":"maria.ugc","display_name":"M
 begin;
 set local role anon;
 do $$ begin
-  assert (select count(*) from public.profiles where username = 'julianguerrerooficial') = 1, 'perfil';
+  assert (select count(*) from public.profiles where username = 'julianguerrero') = 1, 'perfil';
   assert (select count(*) from public.social_links) = 3, 'redes';
   assert (select count(*) from public.campaigns) = 5, 'campañas';
   assert (select count(*) from public.campaign_videos) = 5, 'videos';
@@ -63,7 +63,7 @@ begin
   get diagnostics n = row_count; assert n = 0, 'maría borró registros ajenos';
   delete from public.campaigns where true;
   get diagnostics n = row_count; assert n = 0, 'maría borró campañas ajenas';
-  update public.profiles set bio_en = 'hacked' where username = 'julianguerrerooficial';
+  update public.profiles set bio_en = 'hacked' where username = 'julianguerrero';
   get diagnostics n = row_count; assert n = 0, 'maría editó un perfil ajeno';
   begin
     insert into public.product_records (user_id, product, received_on)
@@ -126,16 +126,16 @@ rollback;
 delete from auth.mfa_factors;
 
 \echo '7. Un perfil marcado como privado desaparece de la parte pública'
-update public.profiles set is_public = false where username = 'julianguerrerooficial';
+update public.profiles set is_public = false where username = 'julianguerrero';
 begin;
 set local role anon;
 do $$ begin
-  assert (select count(*) from public.profiles where username = 'julianguerrerooficial') = 0, 'perfil privado visible';
+  assert (select count(*) from public.profiles where username = 'julianguerrero') = 0, 'perfil privado visible';
   assert (select count(*) from public.campaigns) = 0, 'campañas de perfil privado visibles';
   assert (select count(*) from public.campaign_videos) = 0, 'videos de perfil privado visibles';
 end $$;
 rollback;
-update public.profiles set is_public = true where username = 'julianguerrerooficial';
+update public.profiles set is_public = true where username = 'julianguerrero';
 
 \echo '8. Nombres de usuario reservados o inválidos se rechazan'
 do $$ begin
@@ -177,12 +177,12 @@ rollback;
 update auth.users set created_at = now() - interval '90 days', last_sign_in_at = now() - interval '61 days' where id = :'julian';
 update private.account_activity set last_active_at = now() - interval '61 days' where user_id = :'julian';
 do $$ begin
-  assert (select stage from public.inactivity_due() where username = 'julianguerrerooficial') = 'warn', 'debería avisar';
+  assert (select stage from public.inactivity_due() where username = 'julianguerrero') = 'warn', 'debería avisar';
   perform public.mark_inactivity_warned('11111111-1111-4111-8111-111111111111');
-  assert not exists (select 1 from public.inactivity_due() where username = 'julianguerrerooficial'), 'no repetir aviso';
+  assert not exists (select 1 from public.inactivity_due() where username = 'julianguerrero'), 'no repetir aviso';
   update private.account_activity set warned_at = now() - interval '11 days'
     where user_id = '11111111-1111-4111-8111-111111111111';
-  assert (select stage from public.inactivity_due() where username = 'julianguerrerooficial') = 'delete', 'debería borrar';
+  assert (select stage from public.inactivity_due() where username = 'julianguerrero') = 'delete', 'debería borrar';
 end $$;
 -- Si Julian vuelve a entrar, el proceso se cancela.
 begin;
@@ -191,7 +191,7 @@ set local role authenticated;
 select public.touch_activity();
 commit;
 do $$ begin
-  assert not exists (select 1 from public.inactivity_due() where username = 'julianguerrerooficial'), 'la actividad no canceló el borrado';
+  assert not exists (select 1 from public.inactivity_due() where username = 'julianguerrero'), 'la actividad no canceló el borrado';
 end $$;
 
 \echo '12. Eliminar cuenta borra todo en cascada'
