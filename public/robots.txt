@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /panel
+Disallow: /entrar
+Disallow: /registro
+Disallow: /recuperar
+Disallow: /nueva-clave

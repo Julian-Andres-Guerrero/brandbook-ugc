@@ -1,0 +1,22 @@
+# Cabeceras de seguridad para Cloudflare Pages.
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com; frame-src https://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+
+# El panel y las páginas de cuenta nunca se indexan ni se guardan en caché.
+/panel/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+/entrar
+  X-Robots-Tag: noindex, nofollow
+/registro
+  X-Robots-Tag: noindex
+/recuperar
+  X-Robots-Tag: noindex, nofollow
+/nueva-clave
+  X-Robots-Tag: noindex, nofollow
