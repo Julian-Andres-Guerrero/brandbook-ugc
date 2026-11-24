@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom'
 import { PublicLayout } from '../../components/Layout'
 import { NETWORK_LABEL, SocialIcon } from '../../components/SocialIcon'
 import { Spinner } from '../../components/ui'
+import { VideoEmbed } from '../../components/VideoEmbed'
+import { toEmbed } from '../../lib/embeds'
 import { useMeta } from '../../components/useMeta'
 import { avatarUrl } from '../../lib/auth'
 import { serviceLabel, useLang, type DictKey } from '../../lib/i18n'
@@ -53,6 +55,14 @@ export default function Profile() {
   const bio = p ? (lang === 'es' ? p.bio_es || p.bio_en : p.bio_en || p.bio_es) : ''
   const headline = p ? (lang === 'es' ? p.headline_es || p.headline_en : p.headline_en || p.headline_es) : ''
   useMeta(p ? `${p.display_name} (@${p.username})` : '', { description: bio || undefined })
+
+  // Todos los videos reproducibles de las campañas, en el orden del portafolio.
+  const featured = (data?.campaigns ?? []).flatMap((c) =>
+    [...(c.campaign_videos ?? [])]
+      .sort((a, b) => a.position - b.position)
+      .map((v) => ({ id: v.id, url: v.url, brand: c.brand, embed: toEmbed(v.url) }))
+      .filter((v): v is { id: string; url: string; brand: string; embed: NonNullable<ReturnType<typeof toEmbed>> } => v.embed !== null),
+  )
 
   if (data === null) return <NotFound profile />
   if (!data || !p) return <PublicLayout><Spinner label="Loading…" /></PublicLayout>
@@ -117,6 +127,19 @@ export default function Profile() {
                 </ul>
               </div>
             )}
+          </section>
+        )}
+
+        {featured.length > 0 && (
+          <section className="mt-12" aria-labelledby="videos-h">
+            <h2 id="videos-h" className="text-xl font-bold">{t('featured_videos')}</h2>
+            <ul className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0">
+              {featured.map((f) => (
+                <li key={f.id} className="w-[62%] shrink-0 snap-start sm:w-auto">
+                  <VideoEmbed embed={f.embed} title={f.brand} href={f.url} />
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 

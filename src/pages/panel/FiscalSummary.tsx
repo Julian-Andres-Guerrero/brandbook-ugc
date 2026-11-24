@@ -29,10 +29,10 @@ export default function FiscalSummary() {
         <button onClick={() => window.print()} className={btn.secondary}>Imprimir / Guardar PDF</button>
       </div>
 
-      <article className="print-plain space-y-6 rounded-2xl border border-line bg-surface p-6">
+      <article className="print-plain min-w-0 space-y-6 rounded-2xl border border-line bg-surface p-4 sm:p-6">
         <header>
-          <h1 className="text-2xl font-bold">Resumen de ingresos {year}</h1>
-          <p className="text-sm text-muted print-plain">
+          <h1 className="text-xl font-bold sm:text-2xl">Resumen de ingresos {year}</h1>
+          <p className="break-words text-sm text-muted print-plain">
             {profile?.display_name} · {session?.user.email} · Generado el {new Date().toLocaleDateString('es-CO')} · Valores en USD
           </p>
         </header>
@@ -53,7 +53,16 @@ export default function FiscalSummary() {
 
         <section>
           <h2 className="mb-2 font-semibold">Por plataforma</h2>
-          <table className="w-full text-sm">
+          {/* Celular: tarjetas. Pantallas grandes e impresión: tabla. */}
+          <ul className="space-y-2 sm:hidden print:hidden">
+            {byPlatform.map((p) => (
+              <li key={p.platform} className="rounded-xl bg-surface-2 p-3 text-sm">
+                <div className="flex justify-between font-semibold"><span>{p.label}</span><span className="tabular-nums">{usd(p.total)}</span></div>
+                <p className="mt-1 text-xs text-muted">{p.count} registros · Productos {usd(p.productValue)} · Efectivo {usd(p.cash)}</p>
+              </li>
+            ))}
+          </ul>
+          <table className="hidden w-full text-sm sm:table print:table">
             <thead>
               <tr className="text-left text-xs uppercase text-muted print-plain">
                 <th scope="col" className={cell}>Plataforma</th>
@@ -79,7 +88,23 @@ export default function FiscalSummary() {
 
         <section>
           <h2 className="mb-2 font-semibold">Detalle ({rows.length})</h2>
-          <div className="overflow-x-auto">
+          <ul className="divide-y divide-line sm:hidden print:hidden">
+            {rows.map((r) => (
+              <li key={r.id} className="py-3 text-sm">
+                <div className="flex justify-between gap-3">
+                  <span className="min-w-0 font-medium">{r.product}</span>
+                  <span className="shrink-0 text-xs text-muted">{r.received_on}</span>
+                </div>
+                <p className="mt-1 text-xs text-muted">
+                  {[r.brand, PLATFORM_LABEL[r.platform]].filter(Boolean).join(' · ')} · Factura: {r.invoice_path ? 'sí' : 'no'}
+                </p>
+                <p className="mt-1 text-xs tabular-nums">
+                  Producto {r.product_value == null ? 'pendiente' : usd(r.product_value)} · Efectivo {usd(r.cash_payment)}
+                </p>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto sm:block print:block">
             <table className="w-full min-w-[640px] text-xs">
               <thead>
                 <tr className="text-left uppercase text-muted print-plain">
