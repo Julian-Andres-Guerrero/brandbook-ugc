@@ -25,7 +25,7 @@ const dict = {
     lang_switch: 'Español', made_with: 'Made with',
     svc_ugc_videos: 'UGC videos', svc_unboxings: 'Unboxings', svc_reviews_demos: 'Reviews & demos', svc_spark_ads: 'Spark Ads', svc_whitelisting: 'Whitelisting',
     svc_photos: 'Product photos', svc_voiceover: 'Voice-over',
-    featured_videos: 'Videos', play_here: 'Play here', embed_notice: 'Tapping play loads the {net} player, which may use its own cookies.',
+    featured_videos: 'Videos', prev_video: 'Previous video', next_video: 'Next video', go_to_video: 'Go to video', play_here: 'Play here', embed_notice: 'Tapping play loads the {net} player, which may use its own cookies.',
   },
   es: {
     nav_login: 'Entrar', nav_signup: 'Crea tu perfil', nav_panel: 'Mi panel',
@@ -48,7 +48,7 @@ const dict = {
     lang_switch: 'English', made_with: 'Hecho con',
     svc_ugc_videos: 'Videos UGC', svc_unboxings: 'Unboxings', svc_reviews_demos: 'Reseñas y demos', svc_spark_ads: 'Spark Ads', svc_whitelisting: 'Whitelisting',
     svc_photos: 'Fotos de producto', svc_voiceover: 'Voz en off',
-    featured_videos: 'Videos', play_here: 'Reproducir aquí', embed_notice: 'Al reproducir se carga el reproductor de {net}, que puede usar sus propias cookies.',
+    featured_videos: 'Videos', prev_video: 'Video anterior', next_video: 'Video siguiente', go_to_video: 'Ir al video', play_here: 'Reproducir aquí', embed_notice: 'Al reproducir se carga el reproductor de {net}, que puede usar sus propias cookies.',
   },
 } as const
 

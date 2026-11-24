@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { PublicLayout } from '../../components/Layout'
 import { NETWORK_LABEL, SocialIcon } from '../../components/SocialIcon'
 import { Spinner } from '../../components/ui'
-import { VideoEmbed } from '../../components/VideoEmbed'
+import { VideoCarousel } from '../../components/VideoCarousel'
 import { toEmbed } from '../../lib/embeds'
 import { useMeta } from '../../components/useMeta'
 import { avatarUrl } from '../../lib/auth'
@@ -133,13 +133,9 @@ export default function Profile() {
         {featured.length > 0 && (
           <section className="mt-12" aria-labelledby="videos-h">
             <h2 id="videos-h" className="text-xl font-bold">{t('featured_videos')}</h2>
-            <ul className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0">
-              {featured.map((f) => (
-                <li key={f.id} className="w-[62%] shrink-0 snap-start sm:w-auto">
-                  <VideoEmbed embed={f.embed} title={f.brand} href={f.url} />
-                </li>
-              ))}
-            </ul>
+            <div className="mt-2">
+              <VideoCarousel videos={featured} />
+            </div>
           </section>
         )}
 
