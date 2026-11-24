@@ -11,7 +11,7 @@ Autor: **Julian Andres Guerrero Vasquez**, ingeniero de sistemas y creador UGC.
 | --- | --- |
 | Frontend | React 19 + TypeScript + Vite + Tailwind CSS 4 + React Router |
 | Backend | Supabase: Postgres con Row Level Security, Auth (email + contraseña, TOTP 2FA), Storage y Edge Functions |
-| Hosting | Cloudflare Pages (gratis), desplegado desde GitHub |
+| Hosting | Cloudflare Workers con archivos estáticos (gratis), desplegado desde GitHub |
 | Pruebas | Vitest (lógica del panel) y pruebas SQL de seguridad RLS |
 
 ---
@@ -21,7 +21,7 @@ Autor: **Julian Andres Guerrero Vasquez**, ingeniero de sistemas y creador UGC.
 1. [Estructura del proyecto](#estructura-del-proyecto)
 2. [Correr el proyecto en tu PC](#correr-el-proyecto-en-tu-pc)
 3. [Conectar Supabase (producción)](#conectar-supabase-producción)
-4. [Desplegar en Cloudflare Pages desde GitHub](#desplegar-en-cloudflare-pages-desde-github)
+4. [Desplegar en Cloudflare desde GitHub](#desplegar-en-cloudflare-desde-github)
 5. [Cargar tu perfil y tus registros reales](#cargar-tu-perfil-y-tus-registros-reales)
 6. [Cómo queda protegido el panel](#cómo-queda-protegido-el-panel)
 7. [Regla de cuentas inactivas](#regla-de-cuentas-inactivas)
@@ -38,7 +38,6 @@ Autor: **Julian Andres Guerrero Vasquez**, ingeniero de sistemas y creador UGC.
 brandbook-ugc/
 ├── public/
 │   ├── _headers          # Cabeceras de seguridad (CSP, HSTS, noindex del panel) para Cloudflare
-│   ├── _redirects        # SPA: todas las rutas van a index.html
 │   └── robots.txt        # El panel y el login no se indexan
 ├── src/
 │   ├── config.ts         # Nombre de la plataforma, correo legal, límites de archivos
@@ -118,26 +117,21 @@ Los buckets `invoices` (privado, 10 MB, PDF/JPG/PNG/WebP) y `avatars` (público,
 
 ---
 
-## Desplegar en Cloudflare Pages desde GitHub
+## Desplegar en Cloudflare desde GitHub
 
-1. Sube este proyecto a un repositorio de GitHub (el `.gitignore` ya excluye `.env*`).
-2. En Cloudflare: **Workers & Pages > Create > Pages > Connect to Git** y elige el repositorio.
-3. Configuración de build:
-   - Framework preset: **Vite** (o *None*)
-   - Build command: `npm run build`
-   - Build output directory: `dist`
-   - Variable `NODE_VERSION` = `20`
-4. **Environment variables** (Production y Preview):
+El proyecto se despliega como **Cloudflare Worker con archivos estáticos** (plan Free), configurado en `wrangler.jsonc`.
+
+1. En Cloudflare: **Workers & Pages > Create > Import a repository** y elige `brandbook-ugc`.
+2. Build command: `npm run build` · Deploy command: `npx wrangler deploy`.
+3. En **Advanced settings > Build variables** (se usan al compilar):
    - `VITE_SUPABASE_URL` = Project URL de Supabase
-   - `VITE_SUPABASE_ANON_KEY` = anon public key
-   - `VITE_SITE_URL` = tu URL pública (ej. `https://brandbook-ugc.pages.dev`)
-   - `VITE_CF_ANALYTICS_TOKEN` = opcional, solo si activas Cloudflare Web Analytics (se carga únicamente si el visitante acepta)
-5. Deploy. Cada `git push` a `main` vuelve a publicar.
-6. Dominio propio (opcional): *Custom domains* en el proyecto de Pages. Actualiza `Site URL` en Supabase y `VITE_SITE_URL`.
+   - `VITE_SUPABASE_ANON_KEY` = publishable/anon key
+   - `VITE_SITE_URL` = opcional; si lo dejas vacío usa la dirección actual del sitio
+   - `VITE_CF_ANALYTICS_TOKEN` = opcional (solo se carga si el visitante acepta)
+4. Deploy. Cada `git push` a `main` vuelve a publicar. La dirección será `https://brandbook-ugc.<tu-subdominio>.workers.dev`.
+5. En Supabase > Authentication > URL Configuration pon esa dirección como `Site URL` y agrega `https://<esa-direccion>/**` en Redirect URLs.
 
-`public/_redirects` hace que `/@usuario` y las rutas del panel funcionen al recargar la página, y `public/_headers` agrega HTTPS estricto (HSTS), CSP, anti-clickjacking y `noindex` para el panel.
-
----
+`wrangler.jsonc` activa el modo SPA (`/@usuario` y el panel funcionan al recargar) y `public/_headers` agrega HSTS, CSP, anti-clickjacking y `noindex` para el panel.
 
 ## Cargar tu perfil y tus registros reales
 

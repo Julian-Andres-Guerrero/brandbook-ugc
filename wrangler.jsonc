@@ -1,0 +1,12 @@
+// Despliegue en Cloudflare Workers (static assets). Gratis en el plan Free.
+// Las variables VITE_* van en Cloudflare > Settings > Build > Variables (se usan al compilar).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "brandbook-ugc",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    // SPA: /@usuario, /panel, etc. los resuelve React Router.
+    "not_found_handling": "single-page-application"
+  }
+}
