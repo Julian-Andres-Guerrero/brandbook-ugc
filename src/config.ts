@@ -13,3 +13,9 @@ export const AVATAR_MIME = ['image/jpeg', 'image/png', 'image/webp'] as const
 // Regla de inactividad (debe coincidir con supabase/migrations/*_inactivity.sql).
 export const INACTIVITY_WARN_DAYS = 60
 export const INACTIVITY_DELETE_DAYS = 10
+
+// Proyecto de Supabase en producción. Ambos valores son PÚBLICOS por diseño
+// (van dentro del JavaScript de cualquier app con Supabase); la seguridad la
+// impone RLS en la base de datos. Las variables VITE_* los sobrescriben.
+export const SUPABASE_PUBLIC_URL = 'https://rkzxxrxengpuwiapneqx.supabase.co'
+export const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_znQl1ZgjFfdgknfJv73Dfg_2zyC10C_'

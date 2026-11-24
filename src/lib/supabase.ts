@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
+import { SUPABASE_PUBLIC_URL, SUPABASE_PUBLISHABLE_KEY } from '../config'
 
-const url = import.meta.env.VITE_SUPABASE_URL
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const url = import.meta.env.VITE_SUPABASE_URL || SUPABASE_PUBLIC_URL
+const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || SUPABASE_PUBLISHABLE_KEY
 
 /** true si faltan las variables de entorno (se muestra una guía en pantalla). */
 export const supabaseMissing = !url || !anonKey
