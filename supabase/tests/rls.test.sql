@@ -140,7 +140,7 @@ update public.profiles set is_public = true where username = 'julianguerrero';
 \echo '8. Nombres de usuario reservados o inválidos se rechazan'
 do $$ begin
   assert not public.username_available('panel'), 'panel debería estar reservado';
-  assert not public.username_available('julianguerrerooficial'), 'ya existe';
+  assert not public.username_available('julianguerrero'), 'ya existe';
   assert not public.username_available('Bad Name!'), 'inválido';
   assert public.username_available('nuevo.creador'), 'debería estar libre';
 end $$;
